@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learn Languages - OMAR</title>
+
+<link rel="manifest" href="manifest.json">
+
+<style>
+body{
+  font-family:Arial;
+  margin:0;
+  background:#f2f2f2;
+  text-align:center;
+}
+
+header{
+  background:#4CAF50;
+  color:white;
+  padding:20px;
+}
+
+.card{
+  background:white;
+  margin:15px;
+  padding:15px;
+  border-radius:12px;
+  box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+button{
+  padding:10px;
+  margin:5px;
+  border:none;
+  border-radius:8px;
+  background:#4CAF50;
+  color:white;
+  cursor:pointer;
+}
+
+input{
+  padding:10px;
+  margin:5px;
+  width:80%;
+}
+
+.hidden{display:none}
+
+.option{
+  display:block;
+  margin:5px;
+  padding:8px;
+  background:#eee;
+  border-radius:8px;
+  cursor:pointer;
+}
+.option:hover{background:#ddd}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>Learn Languages</h1>
+  <p>Duolingo Style App 🌍</p>
+</header>
+
+<!-- LOGIN -->
+<section class="card" id="loginBox">
+  <h2>Login</h2>
+  <input placeholder="Email">
+  <input type="password" placeholder="Password">
+  <button onclick="login()">Start</button>
+</section>
+
+<!-- APP -->
+<section id="app" class="hidden">
+
+  <div class="card">
+    <p>XP: <span id="xp">0</span> | Level: <span id="level">1</span></p>
+  </div>
+
+  <div class="card">
+    <button onclick="start('en')">English</button>
+    <button onclick="start('fr')">Français</button>
+  </div>
+
+  <div id="lesson" class="card hidden">
+    <h2 id="title"></h2>
+    <div id="content"></div>
+    <div id="quiz"></div>
+    <button onclick="next()">Next</button>
+  </div>
+
+</section>
+
+<script>
+// ================= XP LOCAL =================
+let xp = localStorage.getItem("xp") ? parseInt(localStorage.getItem("xp")) : 0;
+
+let index = 0;
+let lang = "en";
+
+document.getElementById("xp").innerText = xp;
+document.getElementById("level").innerText = Math.floor(xp/50)+1;
+
+// ================= LESSONS =================
+const lessons = {
+ en: [
+  {w:"Hello", a:"Bonjour", o:["Bonjour","Merci","Salut"]},
+  {w:"Thank you", a:"Merci", o:["Merci","Bonsoir","Oui"]},
+  {w:"Good night", a:"Bonne nuit", o:["Bonne nuit","Bonjour","Merci"]},
+  {w:"Yes", a:"Oui", o:["Oui","Non","Maybe"]}
+ ],
+ fr: [
+  {w:"Bonjour", a:"Hello", o:["Hello","Bye","Thanks"]},
+  {w:"Merci", a:"Thank you", o:["Thank you","Sorry","Yes"]},
+  {w:"Oui", a:"Yes", o:["Yes","No","Maybe"]}
+ ]
+};
+
+// ================= LOGIN =================
+function login(){
+ document.getElementById("loginBox").style.display="none";
+ document.getElementById("app").classList.remove("hidden");
+}
+
+// ================= START =================
+function start(l){
+ lang = l;
+ index = 0;
+ document.getElementById("lesson").classList.remove("hidden");
+ show();
+}
+
+// ================= SHOW =================
+function show(){
+ let d = lessons[lang][index];
+
+ document.getElementById("title").innerText = "Lesson";
+ document.getElementById("content").innerHTML = "<h2>"+d.w+"</h2>";
+
+ let html = "<h3>Choose correct answer:</h3>";
+
+ d.o.forEach(opt=>{
+  html += `<div class="option" onclick="check('${opt}','${d.a}')">${opt}</div>`;
+ });
+
+ document.getElementById("quiz").innerHTML = html;
+}
+
+// ================= CHECK =================
+function check(selected, correct){
+ if(selected === correct){
+   xp += 10;
+   alert("Correct +10 XP 🎉");
+ }else{
+   alert("Wrong ❌ Answer: " + correct);
+ }
+
+ localStorage.setItem("xp", xp);
+
+ document.getElementById("xp").innerText = xp;
+ document.getElementById("level").innerText = Math.floor(xp/50)+1;
+}
+
+// ================= NEXT =================
+function next(){
+ index++;
+ if(index >= lessons[lang].length) index = 0;
+ show();
+}
+
+// ================= SERVICE WORKER =================
+if("serviceWorker" in navigator){
+ navigator.serviceWorker.register("sw.js")
+ .then(()=>console.log("SW Ready 🚀"));
+}
+</script>
+
+</body>
+</html>
